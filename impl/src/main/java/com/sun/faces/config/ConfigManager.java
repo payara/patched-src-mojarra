@@ -13,12 +13,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
-
+// Portions Copyright [2018] Payara Foundation and/or affiliates
 package com.sun.faces.config;
 
 import static com.sun.faces.RIConstants.FACES_PREFIX;
 import static com.sun.faces.config.WebConfiguration.BooleanWebContextInitParameter.DisableFaceletJSFViewHandler;
 import static com.sun.faces.config.WebConfiguration.BooleanWebContextInitParameter.DisableFaceletJSFViewHandlerDeprecated;
+import static com.sun.faces.config.WebConfiguration.BooleanWebContextInitParameter.EnableParallelInit;
 import static com.sun.faces.config.WebConfiguration.BooleanWebContextInitParameter.EnableThreading;
 import static com.sun.faces.config.WebConfiguration.BooleanWebContextInitParameter.ValidateFacesConfigFiles;
 import static com.sun.faces.config.manager.Documents.getProgrammaticDocuments;
@@ -32,6 +33,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableList;
 import static java.util.logging.Level.FINE;
+import static java.util.stream.StreamSupport.stream;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -249,16 +251,19 @@ public class ConfigManager {
     public void initialize(ServletContext servletContext, InitFacesContext facesContext) {
 
         if (!hasBeenInitialized(servletContext)) {
+        	
+        		WebConfiguration webConfig = WebConfiguration.getInstance(servletContext);
+            boolean validating = webConfig.isOptionEnabled(ValidateFacesConfigFiles);
+            boolean useParallelInit = webConfig.isOptionEnabled(EnableParallelInit);
+            boolean useThreads = webConfig.isOptionEnabled(EnableThreading);
             
             initializedContexts.add(servletContext);
-            initializeConfigProcessers(servletContext, facesContext);
+            initializeConfigProcessers(servletContext, facesContext, useParallelInit);
             ExecutorService executor = null;
             
             try {
-                WebConfiguration webConfig = WebConfiguration.getInstance(servletContext);
-                boolean validating = webConfig.isOptionEnabled(ValidateFacesConfigFiles);
                 
-                if (useThreads(servletContext)) {
+                if (useThreads) {
                     executor = createExecutorService();
                 }
                 
@@ -290,7 +295,7 @@ public class ConfigManager {
                 // from each document.
                 
                 DocumentInfo[] facesDocuments2 = facesDocuments;
-                configProcessors.subList(0, 3).stream().forEach(e -> {
+                configProcessors.subList(0, 3).stream().forEachOrdered(e -> {
                     try {
                         e.process(servletContext, facesContext, facesDocuments2);
                     } catch (Exception e2) {
@@ -304,10 +309,23 @@ public class ConfigManager {
                 
                 ThreadContext threadContext = getThreadContext(containerConnector);
                 Object parentWebContext = threadContext != null ? threadContext.getParentWebContext() : null;
+                
+                Application application = facesContext.getApplication();
+                if (application == null) {
+                		LOGGER.severe("Application is null!");
+                }
                             
-                configProcessors.subList(3, configProcessors.size()).stream().forEach(e -> {
+                stream(configProcessors.subList(3, configProcessors.size()).spliterator(), useParallelInit).forEach(e -> {
                     
                     long currentThreadId = Thread.currentThread().getId();
+                    
+                    LOGGER.info(
+                    		"Executing config processer: " + e.getClass() + 
+                    		" parallel: " + useParallelInit + 
+                    		" thread id: " + currentThreadId
+                    	);
+                    
+                    System.out.println("thread id: " + currentThreadId + " ") ;
                     
                     InitFacesContext initFacesContext = null;
                     if (currentThreadId != parentThreadId) {
@@ -412,10 +430,6 @@ public class ConfigManager {
         sc.setAttribute(ANNOTATIONS_SCAN_TASK_KEY, scanTask);
     }
 
-    private boolean useThreads(ServletContext ctx) {
-        return WebConfiguration.getInstance(ctx).isOptionEnabled(EnableThreading);
-    }
-
     private List<ConfigurationResourceProvider> getFacesConfigResourceProviders() {
         return getConfigurationResourceProviders(facesConfigProviders, FacesConfig);
     }
@@ -440,8 +454,8 @@ public class ConfigManager {
         return unmodifiableList(providers);
     }
     
-    private void initializeConfigProcessers(ServletContext servletContext, FacesContext facesContext) {
-        configProcessors.stream().parallel().forEach(e -> e.initializeClassMetadataMap(servletContext, facesContext));
+    private void initializeConfigProcessers(ServletContext servletContext, FacesContext facesContext, boolean useParallelInit) {
+    		stream(configProcessors.spliterator(), false).forEach(e -> e.initializeClassMetadataMap(servletContext, facesContext));
     }
     
     private List<ApplicationConfigurationPopulator> getConfigPopulators() {
@@ -598,7 +612,11 @@ public class ConfigManager {
      *            the <code>ServletContext</code> for the application that needs to be removed
      */
     public void destroy(ServletContext servletContext, FacesContext facesContext) {
-        configProcessors.stream().forEach(e -> e.destroy(servletContext, facesContext));
+        boolean useParallelInit = WebConfiguration.getInstance(servletContext).isOptionEnabled(EnableParallelInit);
+        
+        useParallelInit = false; // tmp
+    	
+        stream(configProcessors.spliterator(), useParallelInit).forEach(e -> e.destroy(servletContext, facesContext));
         initializedContexts.remove(servletContext);
     }
 

@@ -13,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
-
+// Portions Copyright [2018] Payara Foundation and/or affiliates
 package com.sun.faces.config;
 
 import static com.sun.faces.config.WebConfiguration.WebContextInitParameter.DefaultSuffix;
@@ -1388,6 +1388,9 @@ public class WebConfiguration {
             false),
         DisallowDoctypeDecl(
             "com.sun.faces.disallowDoctypeDecl",
+            false),
+    		EnableParallelInit(
+            "fish.payara.faces.enableParallelInit",
             false);
 
         private BooleanWebContextInitParameter alternate;

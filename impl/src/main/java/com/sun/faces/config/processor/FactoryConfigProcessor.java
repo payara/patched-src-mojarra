@@ -13,12 +13,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
-
+// Portions Copyright [2018] Payara Foundation and/or affiliates
 package com.sun.faces.config.processor;
 
+import static com.sun.faces.config.WebConfiguration.BooleanWebContextInitParameter.EnableParallelInit;
 import static java.text.MessageFormat.format;
 import static java.util.Arrays.asList;
 import static java.util.logging.Level.FINE;
+import static java.util.stream.StreamSupport.stream;
 
 import java.text.MessageFormat;
 import java.util.Deque;
@@ -40,6 +42,7 @@ import org.w3c.dom.NodeList;
 import com.sun.faces.application.InjectionApplicationFactory;
 import com.sun.faces.config.ConfigurationException;
 import com.sun.faces.config.InitFacesContext;
+import com.sun.faces.config.WebConfiguration;
 import com.sun.faces.config.manager.documents.DocumentInfo;
 import com.sun.faces.context.InjectionFacesContextFactory;
 import com.sun.faces.util.FacesLogger;
@@ -290,11 +293,13 @@ public class FactoryConfigProcessor extends AbstractConfigProcessor {
             
             Deque<Exception> exceptions = new ConcurrentLinkedDeque<>();
             
-            
+            boolean useParallelInit = WebConfiguration.getInstance(servletContext).isOptionEnabled(EnableParallelInit);
             ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
             
+            useParallelInit = false; // tmp
+            
             try {
-                factoryNames.stream().forEach(e -> {
+            		stream(factoryNames.spliterator(), useParallelInit).forEach(e -> {
                     
                     Thread.currentThread().setContextClassLoader(contextClassLoader);
                     InitFacesContext.getInstance(servletContext);
