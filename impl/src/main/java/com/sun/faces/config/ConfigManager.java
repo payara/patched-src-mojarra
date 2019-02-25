@@ -13,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
-// Portions Copyright [2018] Payara Foundation and/or affiliates
+// Portions Copyright [2018-2019] Payara Foundation and/or affiliates
 package com.sun.faces.config;
 
 import static com.sun.faces.RIConstants.FACES_PREFIX;
@@ -319,13 +319,11 @@ public class ConfigManager {
                     
                     long currentThreadId = Thread.currentThread().getId();
                     
-                    LOGGER.info(
+                    LOGGER.fine(
                     		"Executing config processer: " + e.getClass() + 
                     		" parallel: " + useParallelInit + 
                     		" thread id: " + currentThreadId
                     	);
-                    
-                    System.out.println("thread id: " + currentThreadId + " ") ;
                     
                     InitFacesContext initFacesContext = null;
                     if (currentThreadId != parentThreadId) {
