@@ -13,14 +13,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
-
+//Portions Copyright [2018] Payara Foundation and/or affiliates
 package com.sun.faces.flow;
 
-import static com.sun.faces.cdi.CdiUtils.addAnnotatedTypes;
+import static java.util.logging.Level.FINE;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.enterprise.event.Observes;
@@ -35,7 +34,7 @@ import javax.faces.flow.builder.FlowDefinition;
 import com.sun.faces.util.FacesLogger;
 
 /*
- *  This is the hook into the bootstrapping of the entire feature.  
+ *  This is the hook into the bootstrapping of the entire feature.
  *
  *  Use the CDI anntation scanning feature to find all beans annotated
  *  with @FlowDefinition.  The scanning work done here is leveraged
@@ -56,38 +55,35 @@ import com.sun.faces.util.FacesLogger;
  *  @FlowDefinition { definingClass, flow-id, defining-document-id }.  A
  *  data structure containing all the tuples is passed to
  *  FlowDiscoveryCDIContext.
- * 
+ *
  */
-
 public class FlowDiscoveryCDIExtension implements Extension {
 
+	// Log instance for this class
+	private static final Logger LOGGER = FacesLogger.FLOW.getLogger();
+	private final List<Producer<Flow>> flowProducers = new CopyOnWriteArrayList<>();
 
-    // Log instance for this class
-    private static final Logger LOGGER = FacesLogger.FLOW.getLogger();
-    private List<Producer<Flow>> flowProducers;
-    
-    public FlowDiscoveryCDIExtension() {
-        flowProducers = new CopyOnWriteArrayList<>();
-        
-    }
-    
-    public List<Producer<Flow>> getFlowProducers() {
-        return flowProducers;
-    }
-    
-    void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event, BeanManager beanManager) {
-        addAnnotatedTypes(event, beanManager, FlowDiscoveryCDIHelper.class);
-    }
-    
-    <T> void findFlowDefiners(@Observes ProcessProducer<T, Flow> pp) {
-    	if (pp.getAnnotatedMember().isAnnotationPresent(FlowDefinition.class)) {
-            flowProducers.add(pp.getProducer());
-            if (LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.log(Level.FINE, "Discovered Flow Producer {0}", pp.getProducer().toString());
-            }
 
-    	}
-    }
-    
-    
+	public List<Producer<Flow>> getFlowProducers() {
+		return flowProducers;
+	}
+
+	void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery event, BeanManager beanManager) {
+		event.addAnnotatedType(
+				beanManager.createAnnotatedType(FlowDiscoveryCDIHelper.class),
+				FlowDiscoveryCDIExtension.class.getName());
+
+	}
+
+	<T> void findFlowDefiners(@Observes ProcessProducer<T, Flow> event) {
+		if (event.getAnnotatedMember().isAnnotationPresent(FlowDefinition.class)) {
+			flowProducers.add(event.getProducer());
+
+			if (LOGGER.isLoggable(FINE)) {
+				LOGGER.log(FINE, "Discovered Flow Producer {0}", event.getProducer().toString());
+			}
+
+		}
+	}
+
 }
