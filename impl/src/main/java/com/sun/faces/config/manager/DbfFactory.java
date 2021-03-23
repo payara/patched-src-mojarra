@@ -89,6 +89,12 @@ public class DbfFactory {
         "/com/sun/faces/web-facelettaglibrary_2_2.xsd";
 
     /**
+     * Location of the facelet-taglib 3.0 Schema
+     */
+    private static final String FACELET_TAGLIB_3_0_XSD =
+        "/com/sun/faces/web-facelettaglibrary_3_0.xsd";
+
+    /**
      * Location of the Faces 2.0 Schema
      */
     private static final String FACES_2_0_XSD =
@@ -111,6 +117,12 @@ public class DbfFactory {
      */
     private static final String FACES_2_3_XSD =
         "/com/sun/faces/web-facesconfig_2_3.xsd";
+
+    /**
+     * Location of the Faces 3.0 Schema
+     */
+    private static final String FACES_3_0_XSD =
+        "/com/sun/faces/web-facesconfig_3_0.xsd";
 
     /**
      * Location of the Faces 1.2 Schema
@@ -139,6 +151,12 @@ public class DbfFactory {
           AS_SCHEMA_DIR + "web-facelettaglibrary_2_2.xsd";
 
     /**
+     * Location of the facelet taglib xsd within GlassFish.
+     */
+    private static final String FACELET_TAGLIB_3_0_XSD_FILE =
+          AS_SCHEMA_DIR + "web-facelettaglibrary_3_0.xsd";
+
+    /**
      * Location of the faces 2.0 xsd within GlassFish.
      */
     private static final String FACES_2_0_XSD_FILE =
@@ -163,6 +181,12 @@ public class DbfFactory {
           AS_SCHEMA_DIR + "web-facesconfig_2_3.xsd";
 
     /**
+     * Location of the faces 3.0 xsd within GlassFish.
+     */
+    private static final String FACES_3_0_XSD_FILE =
+          AS_SCHEMA_DIR + "web-facesconfig_3_0.xsd";
+
+    /**
      * Location of the faces 1.2 xsd within GlassFish.
      */
     private static final String FACES_1_2_XSD_FILE =
@@ -185,10 +209,12 @@ public class DbfFactory {
         FACES_21,
         FACES_22,
         FACES_23,
+        FACES_30,
         FACES_12,
         FACES_11,
         FACELET_TAGLIB_20,
-        FACELET_TAGLIB_22;        
+        FACELET_TAGLIB_22,     
+        FACELET_TAGLIB_30;        
     }
 
     /**
@@ -252,6 +278,11 @@ public class DbfFactory {
                  FACES_2_3_XSD_FILE
             },
             {
+                "web-facesconfig_3_0.xsd",
+                 FACES_3_0_XSD,
+                 FACES_3_0_XSD_FILE
+            },
+            {
                 "facelet-taglib_1_0.dtd",
                 "/com/sun/faces/facelet-taglib_1_0.dtd",
                 null
@@ -292,6 +323,11 @@ public class DbfFactory {
                 AS_SCHEMA_DIR + "javaee_8.xsd"
             },
             {
+                "jakartaee_9.xsd",
+                "/com/sun/faces/jakartaee_9.xsd",
+                AS_SCHEMA_DIR + "jakartaee_9.xsd"
+            },
+            {
                 "javaee_web_services_client_1_2.xsd",
                 "/com/sun/faces/javaee_web_services_client_1_2.xsd",
                 AS_SCHEMA_DIR + "javaee_web_services_client_1_2.xsd"
@@ -305,6 +341,11 @@ public class DbfFactory {
                 "javaee_web_services_client_1_4.xsd",
                 "/com/sun/faces/javaee_web_services_client_1_4.xsd",
                 AS_SCHEMA_DIR + "javaee_web_services_client_1_4.xsd"
+            },
+            {
+                "jakartaee_web_services_client_2_0.xsd",
+                "/com/sun/faces/jakartaee_web_services_client_2_0.xsd",
+                AS_SCHEMA_DIR + "jakartaee_web_services_client_2_0.xsd"
             },
             {
                 "xml.xsd",
@@ -716,6 +757,24 @@ public class DbfFactory {
                     schema = factory.newSchema(new StreamSource(in));
                     schemaMap.put(schemaId, schema);
                     break;
+                case FACES_30:
+                    url = DbfFactory.class.getResource(FACES_3_0_XSD);
+                    if (url == null) {
+                        // try to load from the file
+                        f = new File(FACES_3_0_XSD_FILE);
+                        if (!f.exists()) {
+                            throw new IllegalStateException("Unable to find web-facesconfig_3_0.xsd");
+                        }
+                        url = f.toURI().toURL();
+                    }
+                    conn = url.openConnection();
+                    conn.setUseCaches(false);
+                    in = conn.getInputStream();
+                    factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                    factory.setResourceResolver((LSResourceResolver) DbfFactory.FACES_ENTITY_RESOLVER);
+                    schema = factory.newSchema(new StreamSource(in));
+                    schemaMap.put(schemaId, schema);
+                    break;
                 case FACES_20:
                     url = DbfFactory.class.getResource(FACES_2_0_XSD);
                     if (url == null) {
@@ -759,6 +818,24 @@ public class DbfFactory {
                         f = new File(FACELET_TAGLIB_2_2_XSD_FILE);
                         if (!f.exists()) {
                             throw new IllegalStateException("Unable to find web-facelettaglibrary_2_2.xsd");
+                        }
+                        url = f.toURI().toURL();
+                    }
+                    conn = url.openConnection();
+                    conn.setUseCaches(false);
+                    in = conn.getInputStream();
+                    factory = Util.createSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                    factory.setResourceResolver((LSResourceResolver) DbfFactory.FACES_ENTITY_RESOLVER);
+                    schema = factory.newSchema(new StreamSource(in));
+                    schemaMap.put(schemaId, schema);
+                    break;
+                case FACELET_TAGLIB_30:
+                    url = DbfFactory.class.getResource(FACELET_TAGLIB_3_0_XSD);
+                    if (url == null) {
+                        // try to load from the file
+                        f = new File(FACELET_TAGLIB_3_0_XSD_FILE);
+                        if (!f.exists()) {
+                            throw new IllegalStateException("Unable to find web-facelettaglibrary_3_0.xsd");
                         }
                         url = f.toURI().toURL();
                     }
