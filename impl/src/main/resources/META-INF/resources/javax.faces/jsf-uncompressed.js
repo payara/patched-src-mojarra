@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// Portions Copyright [2022] Payara Foundation and/or affiliates
 
 /**
  @project JSF JavaScript Library
@@ -2530,13 +2531,16 @@ if (!((jsf && jsf.specversion && jsf.specversion >= 23000 ) &&
                 var namingContainerPrefix = viewStateElement.name.substring(0, viewStateElement.name.indexOf("javax.faces.ViewState"));
 
                 args[namingContainerPrefix + "javax.faces.source"] = element.id;
+                args[namingContainerPrefix + "jakarta.faces.source"] = element.id; // add jakarta duplicate arg
 
                 if (event && !!event.type) {
                     args[namingContainerPrefix + "javax.faces.partial.event"] = event.type;
+                    args[namingContainerPrefix + "jakarta.faces.partial.event"] = event.type; // add jakarta duplicate arg
                 }
 
                 if ("resetValues" in options) {
                     args[namingContainerPrefix + "javax.faces.partial.resetValues"] = options.resetValues;
+                    args[namingContainerPrefix + "jakarta.faces.partial.resetValues"] = options.resetValues; // add jakarta duplicate arg
                 }
 
                 // If we have 'execute' identifiers:
@@ -2564,10 +2568,12 @@ if (!((jsf && jsf.specversion && jsf.specversion >= 23000 ) &&
                             options.execute = "@all";
                         }
                         args[namingContainerPrefix + "javax.faces.partial.execute"] = options.execute;
+                        args[namingContainerPrefix + "jakarta.faces.partial.execute"] = options.execute; // add jakarta duplicate arg
                     }
                 } else {
                     options.execute = element.name + " " + element.id;
                     args[namingContainerPrefix + "javax.faces.partial.execute"] = options.execute;
+                    args[namingContainerPrefix + "jakarta.faces.partial.execute"] = options.execute; // add jakarta duplicate arg
                 }
 
                 if (options.render) {
@@ -2584,6 +2590,7 @@ if (!((jsf && jsf.specversion && jsf.specversion >= 23000 ) &&
                             options.render = "@all";
                         }
                         args[namingContainerPrefix + "javax.faces.partial.render"] = options.render;
+                        args[namingContainerPrefix + "jakarta.faces.partial.render"] = options.render; // add jakarta duplicate arg
                     }
                 }
                 var explicitlyDoNotDelay = ((typeof options.delay == 'undefined') || (typeof options.delay == 'string') &&
@@ -2650,11 +2657,19 @@ if (!((jsf && jsf.specversion && jsf.specversion >= 23000 ) &&
                 for (var property in options) {
                     if (options.hasOwnProperty(property)) {
                         args[namingContainerPrefix + property] = options[property];
+                        if(property.startsWith("javax.")) {
+                             // add jakarta duplicate arg
+                            jakartaProperty = "jakarta."+property.substring("javax.".length);
+                            args[namingContainerPrefix + jakartaProperty] = options[property];
+                        }
                     }
                 }
 
                 args[namingContainerPrefix + "javax.faces.partial.ajax"] = "true";
+                args[namingContainerPrefix + "jakarta.faces.partial.ajax"] = "true"; // add jakarta duplicate arg
                 args["method"] = "POST";
+                 // add jakarta duplicate ViewState. It is added to parameters via viewState and queryString, so add jakarta version explicitly.
+                args[namingContainerPrefix + "jakarta.faces.ViewState"] = viewStateElement.value;
 
                 // Determine the posting url
 
