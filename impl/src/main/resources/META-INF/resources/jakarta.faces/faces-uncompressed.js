@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// Portions Copyright [2022] Payara Foundation and/or affiliates
 
 /**
  @project Faces JavaScript Library
@@ -2529,13 +2530,16 @@ if (!((faces && faces.specversion && faces.specversion >= 23000 ) &&
                 var namingContainerPrefix = viewStateElement.name.substring(0, viewStateElement.name.indexOf("jakarta.faces.ViewState"));
 
                 args[namingContainerPrefix + "jakarta.faces.source"] = element.id;
+                args[namingContainerPrefix + "javax.faces.source"] = element.id; // add javax duplicate arg
 
                 if (event && !!event.type) {
                     args[namingContainerPrefix + "jakarta.faces.partial.event"] = event.type;
+                    args[namingContainerPrefix + "javax.faces.partial.event"] = event.type; // add javax duplicate arg
                 }
 
                 if ("resetValues" in options) {
                     args[namingContainerPrefix + "jakarta.faces.partial.resetValues"] = options.resetValues;
+                    args[namingContainerPrefix + "javax.faces.partial.resetValues"] = options.resetValues;
                 }
 
                 // If we have 'execute' identifiers:
@@ -2563,10 +2567,12 @@ if (!((faces && faces.specversion && faces.specversion >= 23000 ) &&
                             options.execute = "@all";
                         }
                         args[namingContainerPrefix + "jakarta.faces.partial.execute"] = options.execute;
+                        args[namingContainerPrefix + "javax.faces.partial.execute"] = options.execute; // add javax duplicate arg
                     }
                 } else {
                     options.execute = element.name + " " + element.id;
                     args[namingContainerPrefix + "jakarta.faces.partial.execute"] = options.execute;
+                    args[namingContainerPrefix + "javax.faces.partial.execute"] = options.execute; // add javax duplicate arg
                 }
 
                 if (options.render) {
@@ -2583,6 +2589,7 @@ if (!((faces && faces.specversion && faces.specversion >= 23000 ) &&
                             options.render = "@all";
                         }
                         args[namingContainerPrefix + "jakarta.faces.partial.render"] = options.render;
+                        args[namingContainerPrefix + "javax.faces.partial.render"] = options.render; // add javax duplicate arg
                     }
                 }
                 var explicitlyDoNotDelay = ((typeof options.delay == 'undefined') || (typeof options.delay == 'string') &&
@@ -2649,11 +2656,19 @@ if (!((faces && faces.specversion && faces.specversion >= 23000 ) &&
                 for (var property in options) {
                     if (options.hasOwnProperty(property)) {
                         args[namingContainerPrefix + property] = options[property];
+                        if(property.startsWith("jakarta.")) {
+                             // add jakarta duplicate arg
+                            jakartaProperty = "javax."+property.substring("jakarta.".length);
+                            args[namingContainerPrefix + jakartaProperty] = options[property];
+                        }
                     }
                 }
 
                 args[namingContainerPrefix + "jakarta.faces.partial.ajax"] = "true";
+                args[namingContainerPrefix + "javax.faces.partial.ajax"] = "true"; // add javax duplicate arg
                 args["method"] = "POST";
+                 // add javax duplicate ViewState. It is added to parameters via viewState and queryString, so add javax version explicitly.
+                args[namingContainerPrefix + "javax.faces.ViewState"] = viewStateElement.value;
 
                 // Determine the posting url
 
