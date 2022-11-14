@@ -13,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
-
+// Portions Copyright [2022] Payara Foundation and/or affiliates
 package com.sun.faces.config.manager.tasks;
 
 import static com.sun.faces.config.manager.DbfFactory.FACES_ENTITY_RESOLVER;
