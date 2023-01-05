@@ -2657,7 +2657,7 @@ if (!((jsf && jsf.specversion && jsf.specversion >= 23000 ) &&
                 for (var property in options) {
                     if (options.hasOwnProperty(property)) {
                         args[namingContainerPrefix + property] = options[property];
-                        if(property.startsWith("javax.")) {
+                        if(/^javax\./.test(property.toString())) {
                              // add jakarta duplicate arg
                             jakartaProperty = "jakarta."+property.substring("javax.".length);
                             args[namingContainerPrefix + jakartaProperty] = options[property];
