@@ -13,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
-
+// Portions Copyright [2022] Payara Foundation and/or affiliates
 package com.sun.faces.config.manager.tasks;
 
 import static com.sun.faces.config.manager.DbfFactory.FACES_ENTITY_RESOLVER;
@@ -77,6 +77,7 @@ public class ParseConfigResourceToDOMTask implements Callable<DocumentInfo> {
 
     private static final String JAVAEE_SCHEMA_LEGACY_DEFAULT_NS = "http://java.sun.com/xml/ns/javaee";
     private static final String JAVAEE_SCHEMA_DEFAULT_NS = "http://xmlns.jcp.org/xml/ns/javaee";
+    private static final String JAKARTAEE_SCHEMA_DEFAULT_NS = "https://jakarta.ee/xml/ns/jakartaee";
     private static final String EMPTY_FACES_CONFIG = "com/sun/faces/empty-faces-config.xml";
     private static final String FACES_CONFIG_TAGNAME = "faces-config";
     private static final String FACELET_TAGLIB_TAGNAME = "facelet-taglib";
@@ -84,6 +85,7 @@ public class ParseConfigResourceToDOMTask implements Callable<DocumentInfo> {
     private static final String FACES_CONFIG_1_X_DEFAULT_NS = "http://java.sun.com/JSF/Configuration";
 
     private static final String FACELETS_1_0_DEFAULT_NS = "http://java.sun.com/JSF/Facelet";
+    private static final String FACELETS_3_0_DEFAULT_NS = "https://jakarta.ee/xml/ns/jakartaee";
 
     /**
      * Stylesheet to convert 1.0 and 1.1 based faces-config documents to our private 1.1 schema for validation.
@@ -231,6 +233,7 @@ public class ParseConfigResourceToDOMTask implements Callable<DocumentInfo> {
              */
             Node documentElement = ((Document) domSource.getNode()).getDocumentElement();
             switch (documentNS) {
+            case JAKARTAEE_SCHEMA_DEFAULT_NS: 
             case JAVAEE_SCHEMA_DEFAULT_NS: {
                 Attr version = (Attr) documentElement.getAttributes().getNamedItem("version");
                 Schema schema;
@@ -249,6 +252,13 @@ public class ParseConfigResourceToDOMTask implements Callable<DocumentInfo> {
                             schema = DbfFactory.getSchema(servletContext, DbfFactory.FacesSchema.FACELET_TAGLIB_22);
                         } else {
                             schema = DbfFactory.getSchema(servletContext, DbfFactory.FacesSchema.FACES_23);
+                        }
+                        break;
+                    case "3.0":
+                        if ("facelet-taglib".equals(documentElement.getLocalName())) {
+                            schema = DbfFactory.getSchema(servletContext, DbfFactory.FacesSchema.FACELET_TAGLIB_30);
+                        } else {
+                            schema = DbfFactory.getSchema(servletContext, DbfFactory.FacesSchema.FACES_30);
                         }
                         break;
                     default:
@@ -325,6 +335,9 @@ public class ParseConfigResourceToDOMTask implements Callable<DocumentInfo> {
                     break;
                 case FACELETS_1_0_DEFAULT_NS:
                     schemaToApply = DbfFactory.getSchema(servletContext, DbfFactory.FacesSchema.FACELET_TAGLIB_20);
+                    break;
+                case FACELETS_3_0_DEFAULT_NS:
+                    schemaToApply = DbfFactory.getSchema(servletContext, DbfFactory.FacesSchema.FACELET_TAGLIB_30);
                     break;
                 default:
                     throw new IllegalStateException();

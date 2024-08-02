@@ -23,6 +23,7 @@ import static java.util.logging.Level.SEVERE;
 
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.faces.application.Application;
@@ -34,16 +35,20 @@ import com.sun.faces.util.FacesLogger;
 /**
  * This {@link javax.faces.application.ApplicationFactory} is responsible for injecting the default
  * {@link Application} instance into the top-level {@link Application} as configured by the runtime.
+ * 
+ * <p>
  * Doing this allows us to preserve backwards compatibility as the API evolves without having the
  * API rely on implementation specific details.
+ * </p>
  */
+//Portions Copyright [2018] Payara Foundation and/or affiliates
 public class InjectionApplicationFactory extends ApplicationFactory {
 
     private static final Logger LOGGER = FacesLogger.APPLICATION.getLogger();
 
     private Application defaultApplication;
     private Field defaultApplicationField;
-    private volatile Application application;
+    private final Map<String, Application> applicationHolder = new ConcurrentHashMap<>(1);
 
     // ------------------------------------------------------------ Constructors
 
@@ -56,31 +61,30 @@ public class InjectionApplicationFactory extends ApplicationFactory {
 
     @Override
     public Application getApplication() {
+    		return applicationHolder.computeIfAbsent("default", e -> {
+    			Application application = getWrapped().getApplication();
 
-        if (application == null) {
-            application = getWrapped().getApplication();
-
-            if (application == null) {
-                throw new IllegalStateException(
+                if (application == null) {
+                    throw new IllegalStateException(
                         format("Delegate ApplicationContextFactory, {0}, returned null when calling getApplication().", getWrapped().getClass().getName()));
-            }
+                }
+                
+                injectDefaultApplication(application);
 
-            injectDefaultApplication();
-        }
-
-        return application;
+             return application;
+         });
     }
 
     @Override
     public synchronized void setApplication(Application application) {
-        this.application = application;
+    		applicationHolder.put("default", application);
         getWrapped().setApplication(application);
-        injectDefaultApplication();
+        injectDefaultApplication(application);
     }
 
     // --------------------------------------------------------- Private Methods
 
-    private void injectDefaultApplication() {
+    private void injectDefaultApplication(Application application) {
 
         if (defaultApplication == null) {
             FacesContext ctx = FacesContext.getCurrentInstance();

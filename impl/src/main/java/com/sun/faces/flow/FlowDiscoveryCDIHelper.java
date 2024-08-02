@@ -13,18 +13,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
-
+//Portions Copyright [2018] Payara Foundation and/or affiliates
 package com.sun.faces.flow;
 
-import com.sun.faces.flow.builder.FlowBuilderImpl;
-import com.sun.faces.RIConstants;
+import static com.sun.faces.RIConstants.FLOW_DISCOVERY_CDI_HELPER_BEAN_NAME;
+
 import java.io.Serializable;
+
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.faces.context.FacesContext;
 import javax.faces.flow.builder.FlowBuilder;
 import javax.faces.flow.builder.FlowBuilderParameter;
 import javax.inject.Named;
+
+import com.sun.faces.flow.builder.FlowBuilderImpl;
 
 /*
  * This is an application scoped bean named with a well-defined,
@@ -36,20 +39,16 @@ import javax.inject.Named;
  * seem to work in the version of weld we have.
  */
 
-@Named(RIConstants.FLOW_DISCOVERY_CDI_HELPER_BEAN_NAME)
+@Named(FLOW_DISCOVERY_CDI_HELPER_BEAN_NAME)
 @Dependent
 public class FlowDiscoveryCDIHelper implements Serializable {
-    
-private static final long serialVersionUID = 6217421203074690365L;
 
-public FlowDiscoveryCDIHelper() {
-    }
-    
-    @Produces @FlowBuilderParameter
-    FlowBuilder createFlowBuilder() {
-        FacesContext context = FacesContext.getCurrentInstance();
-        FlowBuilder result = new FlowBuilderImpl(context);
-        return result;
-    }
-    
+	private static final long serialVersionUID = 6217421203074690365L;
+
+	@Produces
+	@FlowBuilderParameter
+	FlowBuilder createFlowBuilder() {
+		return new FlowBuilderImpl(FacesContext.getCurrentInstance());
+	}
+
 }
