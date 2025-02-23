@@ -159,7 +159,7 @@ public class ELFlash extends Flash {
      */
     static final String FLASH_NOW_REQUEST_KEY = FLASH_ATTRIBUTE_NAME + "n";
 
-    private enum CONSTANTS {
+    enum CONSTANTS {
 
 	/**
 	 * The key in the FacesContext attributes map (hereafter
@@ -219,7 +219,7 @@ public class ELFlash extends Flash {
     // <editor-fold defaultstate="collapsed" desc="Constructors and instance accessors">
 
     /** Creates a new instance of ELFlash */
-    private ELFlash(ExternalContext extContext) {
+    ELFlash(ExternalContext extContext) {
         flashInnerMap = new ConcurrentHashMap<>();
         WebConfiguration config = WebConfiguration.getInstance(extContext);
         String value;
@@ -773,9 +773,7 @@ public class ELFlash extends Flash {
                 context.getAttributes().get(CONSTANTS.KeepFlagAttributeName);
     }
 
-
-
-    private long getNewSequenceNumber() {
+    long getNewSequenceNumber() {
         long result = sequenceNumber.incrementAndGet();
 
         if (0 == result % numberOfFlashesBetweenFlashReapings) {
@@ -1255,7 +1253,7 @@ public class ELFlash extends Flash {
      * <p>See the docs for FlashInfo for more information.</p>
      */
 
-    private static final class PreviousNextFlashInfoManager {
+    static final class PreviousNextFlashInfoManager {
 
         private FlashInfo previousRequestFlashInfo;
 
@@ -1271,7 +1269,7 @@ public class ELFlash extends Flash {
             this.guard = guard;
         }
 
-        private PreviousNextFlashInfoManager(ByteArrayGuardAESCTR guard, Map<String,Map<String, Object>> innerMap) {
+        PreviousNextFlashInfoManager(ByteArrayGuardAESCTR guard, Map<String, Map<String, Object>> innerMap) {
             this.guard = guard;
             this.innerMap = innerMap;
         }
@@ -1473,6 +1471,8 @@ public class ELFlash extends Flash {
                     nextRequestFlashInfo.setFlashMap(flashMap);
                 }
             } catch (Throwable t) {
+                previousRequestFlashInfo = new FlashInfo();
+                previousRequestFlashInfo.setFlashMap(new HashMap<>(1));
                 context.getAttributes().put(CONSTANTS.ForceSetMaxAgeZero, Boolean.TRUE);
                 if (LOGGER.isLoggable(Level.SEVERE)) {
                     LOGGER.log(Level.SEVERE,
@@ -1555,7 +1555,7 @@ public class ELFlash extends Flash {
      * <p>Encapsulate one of the two maps that back the flash for the
      * current request.</p>
      */
-    private static final class FlashInfo {
+    static final class FlashInfo {
 
 	/**
 	 * <p>Set to true by the Flash when the extContext tells us
