@@ -17,7 +17,6 @@
 package com.sun.faces.cdi;
 
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.context.FacesContext;
 
@@ -36,12 +35,9 @@ public class ViewProducer extends CdiProducer<UIViewRoot> {
      */
     private static final long serialVersionUID = 1L;
 
-    public ViewProducer(BeanManager beanManager) {
-        super.name("view")
-            .scope(RequestScoped.class)
-            .beanClass(beanManager, UIViewRoot.class)
-            .types(UIViewRoot.class)
-            .create(e -> FacesContext.getCurrentInstance().getViewRoot());
+    public ViewProducer() {
+        super.name("view").scope(RequestScoped.class).types(UIViewRoot.class)
+                .create(e -> FacesContext.getCurrentInstance().getViewRoot());
     }
 
 }

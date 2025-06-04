@@ -20,7 +20,6 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.Flash;
 
@@ -41,12 +40,10 @@ public class FlashProducer extends CdiProducer<Object> {
     private static class Dummy {
     }
 
-    public FlashProducer(BeanManager beanManager) {
+    public FlashProducer() {
         super.name("flash")
-            .beanClass(beanManager, Flash.class)
-            .types(Flash.class, new ParameterizedTypeImpl(Map.class, new Type[] { Dummy.class, Dummy.class }), Object.class)
-            .scope(RequestScoped.class)
-            .create(e -> FacesContext.getCurrentInstance().getExternalContext().getFlash());
+                .types(Flash.class, new ParameterizedTypeImpl(Map.class, new Type[] { Dummy.class, Dummy.class }), Object.class).scope(RequestScoped.class)
+                .create(e -> FacesContext.getCurrentInstance().getExternalContext().getFlash());
     }
 
 }
