@@ -396,8 +396,11 @@ public class TagAttributeImpl extends TagAttribute {
                         "Successfully resolved expression '" + lookupExpression.getExpressionString() + "', but the value is not a MethodExpression");
             }
 
-            return ((MethodExpression) result).invoke(elContext, args);
-
+            try {
+                return ((MethodExpression) result).invoke(elContext, args);
+            } catch(RuntimeException e) {
+                throw new IllegalArgumentException(e);
+            }
         }
 
         @Override
