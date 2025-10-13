@@ -397,8 +397,7 @@ public class TagAttributeImpl extends TagAttribute {
             }
 
             try {
-                Object object = ((MethodExpression) result).invoke(elContext, args);
-                return object;
+                return ((MethodExpression) result).invoke(elContext, args);
             } catch(RuntimeException e) {
                 throw new IllegalArgumentException(e);
             }
