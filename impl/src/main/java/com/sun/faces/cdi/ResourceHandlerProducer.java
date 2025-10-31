@@ -16,10 +16,7 @@
 
 package com.sun.faces.cdi;
 
-import java.util.Map;
-
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.faces.application.Application;
 import jakarta.faces.application.ResourceHandler;
 import jakarta.faces.context.FacesContext;
@@ -41,12 +38,9 @@ public class ResourceHandlerProducer extends CdiProducer<ResourceHandler> {
      */
     private static final long serialVersionUID = 1L;
 
-    public ResourceHandlerProducer(BeanManager beanManager) {
-        super.name("resource")
-            .scope(RequestScoped.class)
-            .beanClass(beanManager, ResourceHandler.class)
-            .types(ResourceHandler.class)
-            .create(e -> FacesContext.getCurrentInstance().getApplication().getResourceHandler());
+    public ResourceHandlerProducer() {
+        super.name("resource").scope(RequestScoped.class).types(ResourceHandler.class)
+                .create(e -> FacesContext.getCurrentInstance().getApplication().getResourceHandler());
     }
 
 }
