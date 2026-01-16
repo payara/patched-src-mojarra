@@ -19,7 +19,6 @@ package com.sun.faces.cdi;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.faces.annotation.FlowMap;
 import jakarta.faces.application.Application;
 import jakarta.faces.context.FacesContext;
@@ -42,13 +41,10 @@ public class FlowMapProducer extends CdiProducer<Map<Object, Object>> {
      */
     private static final long serialVersionUID = 1L;
 
-    public FlowMapProducer(BeanManager beanManager) {
-        super.name("flowScope")
-            .scope(FlowScoped.class)
-            .qualifiers(FlowMap.Literal.INSTANCE)
-            .beanClass(beanManager, Map.class)
-            .types(new ParameterizedTypeImpl(Map.class, new Type[] { Object.class, Object.class }), Map.class, Object.class)
-            .create(e -> FacesContext.getCurrentInstance().getApplication().getFlowHandler().getCurrentFlowScope());
+    public FlowMapProducer() {
+        super.name("flowScope").scope(FlowScoped.class).qualifiers(FlowMap.Literal.INSTANCE)
+                .types(new ParameterizedTypeImpl(Map.class, new Type[] { Object.class, Object.class }), Map.class, Object.class)
+                .create(e -> FacesContext.getCurrentInstance().getApplication().getFlowHandler().getCurrentFlowScope());
     }
 
 }
