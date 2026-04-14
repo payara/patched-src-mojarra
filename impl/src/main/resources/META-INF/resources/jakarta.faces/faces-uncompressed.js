@@ -2684,6 +2684,11 @@ if (!((faces && faces.specversion && faces.specversion >= 40000 ) &&
                 for (var property in options) {
                     if (options.hasOwnProperty(property)) {
                         args[namingContainerPrefix + property] = options[property];
+                        if(/^jakarta\./.test(property.toString())) {
+                             // add jakarta duplicate arg
+                            jakartaProperty = "javax."+property.substring("jakarta.".length);
+                            args[namingContainerPrefix + jakartaProperty] = options[property];
+                        }
                     }
                 }
 
