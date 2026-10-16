@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import com.sun.faces.application.view.ViewScopeManager;
 import com.sun.faces.cdi.CdiUtils;
+import com.sun.faces.cdi.CdiExtension;
 import com.sun.faces.el.ELContextImpl;
 import com.sun.faces.renderkit.RenderKitUtils;
 import com.sun.faces.util.FacesLogger;
