@@ -359,10 +359,10 @@ public final class CdiUtils {
     }
 
     /**
-     * Resolves and caches the {@link FacesContextProducer}-typed {@link FacesContext} bean
-     * once per {@link BeanManager} of each application. Used by the per-request {@link FacesContext#release()}
+     * Resolves and caches the {@link CdiExtension}-registered {@link FacesContext} bean
+     * once per {@link BeanManager}. Used by the per-request {@link FacesContext#release()}
      * destruction path: the producer is registered exactly once per application, so re-running
-     * the type-containment filter on every request is wasted work.
+     * the filter on every request is wasted work.
      */
     public static Bean<?> resolveFacesContextProducerBean(BeanManager beanManager) {
         CdiBeanCache cdiBeanCache = cdiBeanCache(currentAssociate(), beanManager);
@@ -372,7 +372,7 @@ public final class CdiUtils {
 
     private static Bean<?> resolveFacesContextProducerBeanUncached(BeanManager beanManager) {
         Set<Bean<?>> beans = beanManager.getBeans(FacesContext.class).stream()
-            .filter(bean -> bean.getTypes().contains(FacesContextProducer.class))
+            .filter(bean -> CdiExtension.class.isAssignableFrom(bean.getBeanClass()))
             .collect(toSet());
         return beanManager.resolve(beans);
     }
@@ -573,13 +573,6 @@ public final class CdiUtils {
         } catch (ContextNotActiveException ignore) {
             return false;
         }
-    }
-
-    /**
-     * Returns true if Weld is used as CDI impl.
-     */
-    public static boolean isWeld(BeanManager beanManager) {
-        return beanManager.getClass().getPackageName().startsWith("org.jboss.weld.");
     }
 
 }

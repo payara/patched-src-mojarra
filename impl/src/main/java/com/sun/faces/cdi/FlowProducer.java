@@ -35,7 +35,7 @@ public class FlowProducer extends CdiProducer<Flow> {
     private static final long serialVersionUID = 1L;
 
     public FlowProducer(BeanManager beanManager) {
-        super.name("flow").scope(RequestScoped.class).beanClass(beanManager, Flow.class).types(Flow.class)
+        super.name("flow").scope(RequestScoped.class).types(Flow.class)
             .create(e -> FacesContext.getCurrentInstance().getApplication().getFlowHandler().getCurrentFlow());
     }
 
