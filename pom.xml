@@ -29,7 +29,7 @@
 
    <groupId>org.glassfish</groupId>
    <artifactId>mojarra-parent</artifactId>
-   <version>4.0.27.payara-p1-SNAPSHOT</version> 
+   <version>4.0.27.payara-p2-SNAPSHOT</version> 
    <packaging>pom</packaging>
 
    <name>Mojarra ${project.version} - Project</name>
@@ -82,17 +82,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <!-- Only impl is published to Maven Central, via central-publishing-maven-plugin in
-                 impl/pom.xml's central-release profile. Disable the default maven-deploy-plugin
-                 here so the parent pom (and any sibling module that lacks its own publishing
-                 configuration) is not deployed. -->
-            <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
             </plugin>
         </plugins>
     </build>

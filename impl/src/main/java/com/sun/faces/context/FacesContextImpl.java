@@ -24,11 +24,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sun.faces.application.view.ViewScopeManager;
-import com.sun.faces.cdi.CdiUtils;
+import com.sun.faces.cdi.CdiExtension;
 import com.sun.faces.el.ELContextImpl;
 import com.sun.faces.renderkit.RenderKitUtils;
 import com.sun.faces.util.FacesLogger;
@@ -59,6 +60,8 @@ import jakarta.faces.event.PhaseId;
 import jakarta.faces.lifecycle.Lifecycle;
 import jakarta.faces.render.RenderKit;
 import jakarta.faces.render.RenderKitFactory;
+
+import static java.util.stream.Collectors.toSet;
 
 public class FacesContextImpl extends FacesContext {
 
@@ -557,7 +560,8 @@ public class FacesContextImpl extends FacesContext {
         DEFAULT_FACES_CONTEXT.remove();
 
         // Destroy our instance produced by FacesContextProducer.
-        Bean<?> bean = CdiUtils.resolveFacesContextProducerBean(beanManager);
+        Set<Bean<?>> beans = beanManager.getBeans(FacesContext.class).stream().filter(bean -> CdiExtension.class.isAssignableFrom(bean.getBeanClass())).collect(toSet());
+        Bean<?> bean = beanManager.resolve(beans);
         ((AlterableContext) beanManager.getContext(bean.getScope())).destroy(bean);
     }
 
